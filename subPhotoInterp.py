@@ -1,14 +1,21 @@
 
+
 import astropy.io.fits as fits
+from astropy.table import Table
+import scipy.interpolate
+import numpy
+import copy
+from IPython.display import display
+
 
 class subPhotoInterp(object):
 
-    def __init__(self,tableFile):
+    def __init__(self,tableFile,silent=False):
 
+        
         self._fitsFile = fits.open(tableFile)
 
-      # Open the FITS file
-        self._fitsFile = fits.open(fitsFileName)
+
         
         # Extract the evaluation energies
         self._ExtractEvalEnergies()
@@ -26,6 +33,18 @@ class subPhotoInterp(object):
 
         self._CreateInterpolation()
 
+        if not silent:
+            self.PrintParameters()
+
+
+    def PrintParameters(self):
+
+        
+        info = numpy.array([self._fitsFile[1].data["NAME"],\
+                                   self._fitsFile[1].data["MINIMUM"],\
+                                   self._fitsFile[1].data["MAXIMUM"] ])
+        tab = Table(info.T, names = ("Parameter","Min","Max"),dtype=["S25",float,float])
+        display(tab)
 
     def _ExtractEvalEnergies(self):
     
@@ -56,8 +75,11 @@ class subPhotoInterp(object):
         self._interpFunc = scipy.interpolate.RegularGridInterpolator(interpGrid,self._tableFluxes,method="linear",fill_value=zero,bounds_error=False)
 
 
-        def __call__(*args,energy):
+    def __call__(self,energy,*args):
+
+        args = list(args)
+        args.append(energy) 
+        args = tuple(args)
 
 
-
-            return self._interpFunc((*args,energy))
+        return self._interpFunc(args)
