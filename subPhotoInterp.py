@@ -57,7 +57,9 @@ class subPhotoInterp(object):
         
         self._numParamValues = (self._fitsFile[1].data["NUMBVALS"]).tolist()
         self._tableParams    = (self._fitsFile[1].data["VALUE"]).tolist()
- 
+
+        for i in range(len(self._numParamValues)):
+            self._tableParams[i] = self._tableParams[i][:self._numParamValues[i]] 
 
 
     def _CreateInterpolation(self):
